@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Woolly - Quản lý đơn hàng</title>
+<style>
+:root{--bg:#FFF8EC;--card:#fff;--ink:#2E2A2A;--muted:#7a7068;--line:#eadfce;--accent:#E8553D;--hl:#FFE08A;--ok:#2e7d4f;--warn:#b26a00;--bad:#c0392b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1f1c1a;--card:#2a2623;--ink:#f3ece2;--muted:#b3a899;--line:#3d3732;--accent:#f0694f;--hl:#4a3f1a;--ok:#5fbf86;--warn:#e8a33d;--bad:#ef7b6d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1f1c1a;--card:#2a2623;--ink:#f3ece2;--muted:#b3a899;--line:#3d3732;--accent:#f0694f;--hl:#4a3f1a;--ok:#5fbf86;--warn:#e8a33d;--bad:#ef7b6d;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{max-width:640px;margin:0 auto;padding:16px 14px 110px}
+h1{font-size:22px;margin:4px 0 12px}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.tile span{display:block;font-size:12px;color:var(--muted)}
+.tile b{font-size:19px;font-variant-numeric:tabular-nums}
+.tile.hot b{color:var(--bad)}
+input,select,textarea,button{font:inherit;color:inherit}
+.search{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:10px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.oc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:4px}
+.badge{flex:none;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--line)}
+.s-moi{color:var(--muted)}.s-coc{color:#2f6fbf}.s-dan{color:var(--warn)}.s-xong{color:var(--ok)}.s-giao{color:var(--ok)}.s-huy{color:var(--bad)}
+.sp{margin-top:4px;font-size:15px}
+.yc{margin-top:6px;font-size:14px;background:var(--hl);border-radius:8px;padding:6px 8px;white-space:pre-wrap}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:13px}
+.dl{font-weight:600}.dl.bad{color:var(--bad)}.dl.warn{color:var(--warn)}.dl.ok{color:var(--muted)}
+.sub{margin-top:4px;font-size:12px;color:var(--muted);word-break:break-word}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.del{color:var(--bad);border-color:var(--bad)}
+.empty{text-align:center;color:var(--muted);padding:28px 10px}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--accent);color:#fff;border:none;border-radius:999px;padding:14px 20px;font-size:16px;font-weight:700;cursor:pointer}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.show{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow-y:auto;border-radius:20px 20px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet h2{margin:0 0 8px;font-size:18px}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 3px}
+.in{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);font-size:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.err{color:var(--bad);font-size:13px;margin-top:6px;min-height:1em}
+details{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+summary{cursor:pointer;font-weight:600}
+details p{font-size:13px;color:var(--muted);margin:8px 0}
+textarea.in{min-height:80px;font-size:13px}
+.warnbar{background:var(--hl);border-radius:10px;padding:8px 10px;font-size:13px;margin-bottom:10px;display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>🧶 Woolly · Quản lý đơn hàng</h1>
+<div class="warnbar" id="warnbar">Trình duyệt đang chặn lưu dữ liệu, đơn sẽ mất khi đóng trang. Hãy dùng mục Sao lưu bên dưới.</div>
+<div class="sum">
+<div class="tile"><span>Đơn đang xử lý</span><b id="sOpen">0</b></div>
+<div class="tile" id="tileLate"><span>Sắp đến hạn / trễ</span><b id="sLate">0</b></div>
+<div class="tile"><span>Còn phải thu</span><b id="sDue">0đ</b></div>
+<div class="tile"><span>Doanh thu đã giao</span><b id="sRev">0đ</b></div>
+</div>
+<input class="search" id="q" type="search" placeholder="Tìm theo tên khách, mẫu khăn, màu, ghi chú...">
+<div class="chips" id="chips"></div>
+<div id="list"></div>
+
+<details>
+<summary>Sao lưu / khôi phục dữ liệu</summary>
+<p>Dữ liệu được lưu ngay trên trình duyệt của bạn, chỉ thấy được trên máy và trình duyệt này. Thỉnh thoảng hãy tạo mã sao lưu và lưu vào ghi chú hoặc Zalo của mình để không bị mất.</p>
+<button class="btn" id="bkMake">Tạo mã sao lưu</button>
+<textarea class="in" id="bkOut" readonly placeholder="Mã sao lưu sẽ hiện ở đây. Bấm giữ để chọn hết rồi sao chép."></textarea>
+<p>Để khôi phục: dán mã sao lưu vào ô dưới rồi bấm Khôi phục (sẽ thay toàn bộ đơn hiện có).</p>
+<textarea class="in" id="bkIn" placeholder="Dán mã sao lưu vào đây"></textarea>
+<button class="btn" id="bkRestore">Khôi phục</button>
+<div class="err" id="bkMsg"></div>
+</details>
+</main>
+
+<button class="fab" id="add">+ Thêm đơn</button>
+
+<div class="ov" id="ov">
+<div class="sheet">
+<h2 id="fTitle">Thêm đơn mới</h2>
+<label for="f_ten">Tên khách *</label><input class="in" id="f_ten">
+<div class="g2">
+<div><label for="f_kenh">Kênh đặt hàng</label><select class="in" id="f_kenh"><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>Zalo</option><option>Shopee</option><option>Khác</option></select></div>
+<div><label for="f_lh">SĐT / link liên hệ</label><input class="in" id="f_lh"></div>
+</div>
+<label for="f_dc">Địa chỉ giao hàng</label><input class="in" id="f_dc">
+<label for="f_sp">Mẫu khăn / họa tiết *</label><input class="in" id="f_sp" placeholder="VD: Khăn mũi lúa mì">
+<div class="g2">
+<div><label for="f_mau">Màu len</label><input class="in" id="f_mau"></div>
+<div><label for="f_size">Kích thước</label><input class="in" id="f_size" placeholder="VD: 20x150cm"></div>
+</div>
+<label for="f_yc">Yêu cầu riêng của khách</label><textarea class="in" id="f_yc" placeholder="VD: thêm tua rua, thêu tên, gói quà..."></textarea>
+<div class="g2">
+<div><label for="f_gia">Giá bán (đ)</label><input class="in" id="f_gia" type="number" inputmode="numeric" min="0" step="1000"></div>
+<div><label for="f_coc">Khách đã trả (đ)</label><input class="in" id="f_coc" type="number" inputmode="numeric" min="0" step="1000"></div>
+</div>
+<div class="g2">
+<div><label for="f_han">Hạn giao</label><input class="in" id="f_han" type="date"></div>
+<div><label for="f_st">Trạng thái</label><select class="in" id="f_st"></select></div>
+</div>
+<div class="err" id="fErr"></div>
+<div class="acts">
+<button class="btn pri" id="fSave">Lưu đơn</button>
+<button class="btn" id="fCancel">Đóng</button>
+<button class="btn del" id="fDel" style="display:none">Xóa đơn</button>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+var KEY='woolly_orders_v1';
+var ST=[['moi','Mới hỏi'],['coc','Đã chốt'],['dan','Đang đan'],['xong','Đan xong'],['giao','Đã giao'],['huy','Hủy']];
+var NEXT={moi:'coc',coc:'dan',dan:'xong',xong:'giao'};
+var LAB={};ST.forEach(function(s){LAB[s[0]]=s[1];});
+var orders=[],filter='open',query='',editId=null,delArmed=false;
+function $(id){return document.getElementById(id);}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var a=JSON.parse(r);if(Array.isArray(a))orders=a;}}catch(e){orders=[];}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(orders));$('warnbar').style.display='none';}catch(e){$('warnbar').style.display='block';}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function money(n){return Math.round(n).toLocaleString('vi-VN')+'đ';}
+function isOpen(o){return o.st!=='giao'&&o.st!=='huy';}
+function daysLeft(h){if(!h)return null;var d=new Date(h+'T00:00:00'),t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/864e5);}
+function due(o){return o.st==='huy'?0:Math.max(0,(+o.gia||0)-(+o.coc||0));}
+
+function render(){
+  var open=orders.filter(isOpen);
+  var late=open.filter(function(o){var d=daysLeft(o.han);return d!==null&&d<=2;});
+  $('sOpen').textContent=open.length;
+  $('sLate').textContent=late.length;
+  $('tileLate').className='tile'+(late.length?' hot':'');
+  $('sDue').textContent=money(orders.reduce(function(s,o){return s+due(o);},0));
+  $('sRev').textContent=money(orders.filter(function(o){return o.st==='giao';}).reduce(function(s,o){return s+(+o.gia||0);},0));
+
+  var chips=[['open','Đang xử lý']].concat(ST).concat([['all','Tất cả']]);
+  $('chips').innerHTML=chips.map(function(c){
+    var n=c[0]==='open'?open.length:c[0]==='all'?orders.length:orders.filter(function(o){return o.st===c[0];}).length;
+    return '<button class="chip'+(filter===c[0]?' on':'')+'" data-f="'+c[0]+'">'+c[1]+' ('+n+')</button>';
+  }).join('');
+
+  var q=query.toLowerCase();
+  var list=orders.filter(function(o){
+    if(filter==='open'&&!isOpen(o))return false;
+    if(filter!=='open'&&filter!=='all'&&o.st!==filter)return false;
+    if(!q)return true;
+    return [o.ten,o.sp,o.mau,o.yc,o.lh,o.kenh].join(' ').toLowerCase().indexOf(q)>-1;
+  }).sort(function(a,b){return (a.han||'9999').localeCompare(b.han||'9999')||(a.tao-b.tao);});
+
+  if(!list.length){$('list').innerHTML='<div class="empty">'+(orders.length?'Không có đơn nào ở mục này.':'Chưa có đơn nào. Bấm “+ Thêm đơn” để bắt đầu.')+'</div>';return;}
+  $('list').innerHTML=list.map(function(o){
+    var d=daysLeft(o.han),dl='';
+    if(o.han&&isOpen(o)){
+      if(d<0)dl='<span class="dl bad">Trễ '+(-d)+' ngày</span>';
+      else if(d===0)dl='<span class="dl bad">Giao hôm nay</span>';
+      else if(d<=2)dl='<span class="dl warn">Còn '+d+' ngày</span>';
+      else dl='<span class="dl ok">Hạn '+o.han.split('-').reverse().join('/')+' (còn '+d+' ngày)</span>';
+    }else if(o.han){dl='<span class="dl ok">Hạn '+o.han.split('-').reverse().join('/')+'</span>';}
+    var rest=due(o);
+    var money1='💰 '+money(+o.gia||0)+(o.st==='huy'?'':(rest>0?' · còn thu <b>'+money(rest)+'</b>':' · đã thu đủ'));
+    var spl=[o.sp,o.mau,o.size].filter(Boolean).map(esc).join(' · ');
+    var sub=[o.lh,o.dc].filter(Boolean).map(esc).join(' · ');
+    var btns='';
+    if(NEXT[o.st])btns+='<button class="btn pri" data-a="next">→ '+LAB[NEXT[o.st]]+'</button>';
+    if(rest>0&&o.st!=='huy')btns+='<button class="btn" data-a="pay">Thu đủ</button>';
+    btns+='<button class="btn" data-a="edit">Sửa</button>';
+    return '<div class="oc" data-id="'+o.id+'"><div class="top"><div><b>'+esc(o.ten)+'</b><span class="tag">'+esc(o.kenh)+'</span></div><span class="badge s-'+o.st+'">'+LAB[o.st]+'</span></div>'
+    +'<div class="sp">'+spl+'</div>'
+    +(o.yc?'<div class="yc">📝 '+esc(o.yc)+'</div>':'')
+    +'<div class="meta">'+dl+'<span>'+money1+'</span></div>'
+    +(sub?'<div class="sub">'+sub+'</div>':'')
+    +'<div class="acts">'+btns+'</div></div>';
+  }).join('');
+}
+
+function openForm(id){
+  editId=id||null;delArmed=false;
+  var o=id?orders.filter(function(x){return x.id===id;})[0]:null;
+  $('fTitle').textContent=o?'Sửa đơn':'Thêm đơn mới';
+  $('f_st').innerHTML=ST.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>';}).join('');
+  var m={ten:'f_ten',kenh:'f_kenh',lh:'f_lh',dc:'f_dc',sp:'f_sp',mau:'f_mau',size:'f_size',yc:'f_yc',gia:'f_gia',coc:'f_coc',han:'f_han',st:'f_st'};
+  var def={kenh:'Facebook',st:'moi'};
+  for(var k in m){$(m[k]).value=o?(o[k]==null?'':o[k]):(def[k]||'');}
+  $('fErr').textContent='';
+  $('fDel').style.display=o?'inline-block':'none';
+  $('fDel').textContent='Xóa đơn';
+  $('ov').className='ov show';
+}
+function closeForm(){$('ov').className='ov';}
+function saveForm(){
+  var ten=$('f_ten').value.trim(),sp=$('f_sp').value.trim();
+  if(!ten||!sp){$('fErr').textContent='Vui lòng nhập tên khách và mẫu khăn.';return;}
+  var data={ten:ten,kenh:$('f_kenh').value,lh:$('f_lh').value.trim(),dc:$('f_dc').value.trim(),sp:sp,mau:$('f_mau').value.trim(),size:$('f_size').value.trim(),yc:$('f_yc').value.trim(),gia:+$('f_gia').value||0,coc:+$('f_coc').value||0,han:$('f_han').value,st:$('f_st').value};
+  if(editId){orders.forEach(function(o){if(o.id===editId){for(var k in data)o[k]=data[k];}});}
+  else{data.id='o'+Date.now();data.tao=Date.now();orders.push(data);}
+  save();closeForm();render();
+}
+
+$('add').onclick=function(){openForm();};
+$('fCancel').onclick=closeForm;
+$('fSave').onclick=saveForm;
+$('fDel').onclick=function(){
+  if(!delArmed){delArmed=true;$('fDel').textContent='Bấm lần nữa để xóa hẳn';return;}
+  orders=orders.filter(function(o){return o.id!==editId;});save();closeForm();render();
+};
+$('ov').onclick=function(e){if(e.target===$('ov'))closeForm();};
+$('q').oninput=function(){query=this.value;render();};
+$('chips').onclick=function(e){var f=e.target.getAttribute('data-f');if(f){filter=f;render();}};
+$('list').onclick=function(e){
+  var a=e.target.getAttribute('data-a');if(!a)return;
+  var card=e.target.closest('.oc');var id=card.getAttribute('data-id');
+  var o=orders.filter(function(x){return x.id===id;})[0];if(!o)return;
+  if(a==='edit'){openForm(id);return;}
+  if(a==='next'&&NEXT[o.st]){o.st=NEXT[o.st];}
+  if(a==='pay'){o.coc=+o.gia||0;}
+  save();render();
+};
+$('bkMake').onclick=function(){$('bkOut').value=JSON.stringify(orders);$('bkMsg').textContent='Đã tạo mã. Hãy sao chép toàn bộ nội dung ô trên.';};
+$('bkRestore').onclick=function(){
+  try{var a=JSON.parse($('bkIn').value);if(!Array.isArray(a))throw 0;orders=a;save();render();$('bkMsg').textContent='Đã khôi phục '+a.length+' đơn.';}
+  catch(e){$('bkMsg').textContent='Mã không hợp lệ, hãy dán lại đầy đủ.';}
+};
+load();render();
+})();
+</script>
+</body>
+</html>
